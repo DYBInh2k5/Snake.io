@@ -2,6 +2,8 @@
 
 Game rắn multiplayer với AI thông minh, power-ups, và chế độ chơi với bạn bè qua P2P!
 
+chơi game tại đây https://dybinh2k5.github.io/Snake.io/
+
 ## ✨ Tính năng
 
 ### 🎮 Gameplay
