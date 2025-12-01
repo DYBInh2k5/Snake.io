@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake.io - Game Rắn Săn Mồi</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+</head>
+<body>
+    <!-- Room Info (shown during multiplayer) -->
+    <div id="roomInfo" class="room-info" style="display: none;">
+        <h4>🎮 Phòng Chơi</h4>
+        <div class="room-code-display" id="roomCodeDisplay"></div>
+        <div class="player-list" id="onlinePlayers"></div>
+    </div>
+
+    <div id="menu" class="menu">
+        <h1>🐍 Snake.io</h1>
+        <input type="text" id="playerName" placeholder="Nhập tên của bạn" maxlength="15">
+        
+        <div class="skin-selector">
+            <h3>Chọn Skin:</h3>
+            <div id="skinOptions" class="skin-options"></div>
+        </div>
+        
+        <div class="mode-selector">
+            <h3>Chọn Chế Độ:</h3>
+            <div class="mode-buttons">
+                <button class="mode-btn active" data-mode="offline">
+                    🤖 Chơi với Bot
+                </button>
+                <button class="mode-btn" data-mode="online">
+                    👥 Chơi với Bạn Bè
+                </button>
+            </div>
+        </div>
+        
+        <div id="offlineMode" class="mode-content">
+            <button id="playBtn" class="play-button">Chơi Game</button>
+        </div>
+        
+        <div id="onlineMode" class="mode-content" style="display: none;">
+            <button id="hostBtn" class="play-button">🎮 Tạo Phòng</button>
+            <div class="divider">HOẶC</div>
+            <input type="text" id="roomCode" placeholder="Nhập mã phòng" maxlength="20">
+            <button id="joinBtn" class="play-button">🚪 Tham Gia Phòng</button>
+            <div id="connectionStatus" class="connection-status"></div>
+        </div>
+        
+        <div class="instructions">
+            <p style="font-weight: bold; color: #667eea; font-size: 14px; margin-bottom: 8px;">📖 Hướng Dẫn</p>
+            <p>🎮 Chuột điều khiển | 🚀 Space/Click = Boost</p>
+            <p>🍎 Ăn thức ăn lớn lên | 💀 Giết rắn khác</p>
+            <p>⚠️ Tránh chạm đầu vào thân rắn</p>
+            
+            <p style="font-weight: bold; color: #667eea; margin-top: 8px;">🌟 Thức ăn:</p>
+            <p style="margin-left: 10px;">⭐+5 | 💎+10 | 👑+20 | 🔥+50</p>
+            
+            <p style="font-weight: bold; color: #667eea; margin-top: 8px;">⚡ Power-ups:</p>
+            <p style="margin-left: 10px;">🛡️ Shield | 🧲 Magnet | ⚡ Speed | 👻 Ghost</p>
+            
+            <p style="font-weight: bold; color: #e74c3c; margin-top: 8px;">🤖 Bot AI:</p>
+            <p style="margin-left: 10px;">🐛 Dễ | 🐍 TB | 🐉 Khó | 👑 Cực khó</p>
+            
+            <p style="font-weight: bold; color: #4ECDC4; margin-top: 8px;">👥 Multiplayer:</p>
+            <p style="margin-left: 10px;">Tạo phòng → Chia sẻ mã → Bạn tham gia</p>
+        </div>
+    </div>
+
+    <div id="gameContainer" style="display: none;">
+        <canvas id="gameCanvas"></canvas>
+        <div id="scoreBoard">
+            <div id="score">Điểm: 0</div>
+            <div id="leaderboard">
+                <h3>Bảng Xếp Hạng</h3>
+                <ol id="topPlayers"></ol>
+            </div>
+        </div>
+        <div class="controls-hint">
+            <p>🖱️ Di chuyển chuột</p>
+            <p>🚀 Giữ Space/Click để Boost</p>
+            <p style="border-top: 1px solid rgba(255,255,255,0.3); margin-top: 8px; padding-top: 8px;">
+                <strong>Thức ăn đặc biệt:</strong><br>
+                <span style="color: #FFD700;">⭐ +5</span> | 
+                <span style="color: #FF1493;">💎 +10</span><br>
+                <span style="color: #00FF00;">👑 +20</span> | 
+                <span style="color: #FF0000;">🔥 +50</span>
+            </p>
+        </div>
+        <div class="food-legend">
+            <h4>🍎 Thức ăn</h4>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #ccc;"></span>
+                <span>Thường: +1</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #FFD700; box-shadow: 0 0 10px #FFD700;"></span>
+                <span>⭐ Vàng: +5</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #FF1493; box-shadow: 0 0 10px #FF1493;"></span>
+                <span>💎 Kim cương: +10</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #00FF00; box-shadow: 0 0 10px #00FF00;"></span>
+                <span>👑 Vương miện: +20</span>
+            </div>
+            <div class="legend-item">
+                <span class="legend-dot" style="background: #FF0000; box-shadow: 0 0 10px #FF0000;"></span>
+                <span>🔥 Lửa: +50</span>
+            </div>
+        </div>
+        <div id="gameOver" class="game-over" style="display: none;">
+            <h2>Game Over!</h2>
+            <p id="finalScore"></p>
+            <button id="restartBtn">Chơi Lại</button>
+        </div>
+    </div>
+
+    <script src="multiplayer.js"></script>
+    <script src="game.js"></script>
+</body>
+</html>
